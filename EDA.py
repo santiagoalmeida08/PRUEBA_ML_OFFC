@@ -9,6 +9,8 @@ import unidecode
 #Paths
 path_datos = r'C:\Users\Usuario\Desktop\PRUEBA_OFFCORSSE\PRUEBA_ML_OFFCORSSE\data\Base Encuesta.xls'
 path_repository = r'C:\Users\Usuario\Desktop\PRUEBA_OFFCORSSE\PRUEBA_ML_OFFCORSSE'
+path_bd_final = r'C:\Users\Usuario\Desktop\PRUEBA_OFFCORSSE\PRUEBA_ML_OFFCORSSE\BD_PBI'
+
 
 #Funciones
 
@@ -98,7 +100,7 @@ for column in df_encuesta_estandar.columns:
 
 #Conservar la respuesta de interes
 df_encuesta_estandar = norm_categorias_preguntas(df_encuesta_estandar)
-df_encuesta_estandar
+df_encuesta_estandar = df_encuesta_estandar.rename(columns = {'Q8' : 'docidentidad'})
 
 
 
@@ -147,7 +149,7 @@ df_personal_estn = df_personal.copy()
 #Chequeo estructura de base
 df_personal_estn.head(10)
 df_personal_estn.columns
-
+df_personal_estn
 
 #Estandarizamos datos a minusculas
 
@@ -171,7 +173,7 @@ for column in df_personal_estn_min.columns:
 df_personal_estn_min = df_personal_estn_min.drop(columns= ['primernombre','nombres','primerapellido','fechatermina','item type',
                                                    'tipodocumento','ciudadexpedicion','nombreestadolaboral','estadocivil',
                                                    'centrocosto','nombrezonaeconomica','empresanombre','empresanombre','nombretipoperiodo',
-                                                   'sucursal','nombresucursal','nombreubicaciongeografica','nombreciudadresidencia','nombreunidad'
+                                                   'sucursal','nombresucursal','nombreubicaciongeografica','nombreciudadresidencia','nombreunidad',
                                                    'nombrecentrocosto'
                                                    ])
 
@@ -203,6 +205,44 @@ df_personal_agrp['grupoedad'] = pd.cut(df_personal_agrp['edad'],
                                        labels = ['joven','adulto','mayor'])
 
 df_personal_agrp['tiempo_empresa'] = (fecha_actual.year -df_personal_agrp['fechaingreso'].dt.year)
+
 df_personal_agrp['tiempo_empresa'].describe()
+
+df_personal_agrp['grupo_t_e'] = pd.cut(df_personal_agrp['tiempo_empresa'],
+                                       bins = [df_personal_agrp['tiempo_empresa'].min()-1,1,4,8,df_personal_agrp['tiempo_empresa'].max()],
+                                       labels = ['Entre 0 y 1 año', 'Entre 2 y 4 años','Ente 5 y 8 años', 'Mas de 8 años'])
+
+
+df_personal_agrp['tiempo_empresa'].value_counts()
+
+#Definimos el nombre de la BD Final
+
+df_personal_estandar = df_personal_agrp.copy()
+df_personal_estandar
+
+df_personal_estandar.isnull().sum()
+df_personal_estandar.dtypes
+df_encuesta_estandar.dtypes
+
+
+
+#5.Uniond de bases de datos 
+
+"""Para tener un analisis mas completo integramos las bases de datos por el docidentidad
+conservando los docs de la tabla de encuestas"""
+
+print(f"La encuesta la respondieron {len(df_encuesta_estandar['docidentidad'].unique())} colaboradores de in total de {len(df_personal_estandar['docidentidad'].unique())}")
+
+
+df_bf_pbi = df_encuesta_estandar.merge(df_personal_estandar, how = 'inner', on = 'docidentidad')
+
+#Verificacion final de base completa
+df_bf_pbi
+df_bf_pbi.isnull().sum()
+
+#Exportacion dataset BD_final
+df_bf_pbi.to_csv(os.path.join(path_bd_final,'info_analisis_encuesta.csv'))
+print(f"La base de datos se exporto correctamente en la ruta {path_bd_final}")
+
 
 
