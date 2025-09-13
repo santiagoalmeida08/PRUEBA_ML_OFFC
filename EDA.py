@@ -210,7 +210,7 @@ df_personal_agrp['tiempo_empresa'].describe()
 
 df_personal_agrp['grupo_t_e'] = pd.cut(df_personal_agrp['tiempo_empresa'],
                                        bins = [df_personal_agrp['tiempo_empresa'].min()-1,1,4,8,df_personal_agrp['tiempo_empresa'].max()],
-                                       labels = ['Entre 0 y 1 año', 'Entre 2 y 4 años','Ente 5 y 8 años', 'Mas de 8 años'])
+                                       labels = ['0 - 1 año', '2 - 4 años', '5 - 8 años', '+ 8 años'])
 
 
 df_personal_agrp['tiempo_empresa'].value_counts()
