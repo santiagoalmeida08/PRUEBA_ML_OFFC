@@ -210,7 +210,7 @@ df_personal_agrp['tiempo_empresa'].describe()
 
 df_personal_agrp['grupo_t_e'] = pd.cut(df_personal_agrp['tiempo_empresa'],
                                        bins = [df_personal_agrp['tiempo_empresa'].min()-1,1,4,8,df_personal_agrp['tiempo_empresa'].max()],
-                                       labels = ['0 - 1 año', '2 - 4 años', '5 - 8 años', '+ 8 años'])
+                                       labels = ['0 - 1 año', '2 - 4 años', '5 - 8 años', '8 años +'])
 
 
 df_personal_agrp['tiempo_empresa'].value_counts()
@@ -243,6 +243,4 @@ df_bf_pbi.isnull().sum()
 #Exportacion dataset BD_final
 df_bf_pbi.to_csv(os.path.join(path_bd_final,'info_analisis_encuesta.csv'))
 print(f"La base de datos se exporto correctamente en la ruta {path_bd_final}")
-
-
 
