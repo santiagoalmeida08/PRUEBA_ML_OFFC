@@ -254,9 +254,18 @@ Se realizara un modelo de clustering usando K-PROTOTYPES, para ello se tomaran l
         - Edad
         - Tiempo empresa
         - Q12 --> Antes de tomar una decisión importante, reviso datos disponibles (tableros, reportes, métricas) para entender mejor la situación.
+                  (indicador de uso de herramientas analíticas)
         - Q13 --> Cuando aparece una nueva herramienta o actualización digital en la empresa, me adapto con curiosidad y busco aprender cómo usarla.
+                   (indicador de apertura tecnológica)
         - Gerencia
-        
+
+Tomamos estas variables ya que segun el analisis realizado en el pbi son las variables mas influyentes para identificar el 
+perfilamiento de los encuestados; por esta razon, con estas variables podemos tener un panorama
+de uso de herramientas tradicionaeles, nuevas tecnologias y resistencia al cambio.   
+
+El objetivo del modelo es identificar perfiles digitales internos que puedan orientar estrategias de formación, acompañamiento 
+y aceleración de la transformación digital en la organización.     
+
 """
 
 df_modelado_var = df_bf_pbi.loc[:, ['edad', 'tiempo_empresa', 'nombregerencia','grupo_t_e','Q12','Q13']].copy()
@@ -290,6 +299,30 @@ df_int = df_modelado_var.groupby('Cluster').agg({
     'grupo_t_e': lambda x: x.mode()[0]
 })
 
+df_int
+
+"""
+Resultados
+
+- De los clusters obtenidos podemos conclir que :
+
+        - cluster 0 : perfiles de personas de personas adultas-mayores con mas de 8 años en la empresa en su gran mayoria,
+        principalmente representados por la gerencia de cadena de suministro. Son personas que por su antiguedad en la empresa 
+        usan herramientas tradicionales en su dia a dia tradicional, seguramente no conocen las herramientas de IA y segun el 
+        cargo pueden tener conocimiento y acceso a herramientas BI
+        
+        - cluster 1: Cluster 1 agrupa a colaboradores adultos con antigüedad media de 5 años y edad promedio de 39 años,
+        principalmente de la gerencia comercial. Son perfiles con experiencia operativa y exposición a herramientas digitales, 
+        lo que sugiere una adopción intermedia de BI segun el cargo y apertura moderada a la transformación digital, 
+        aunque aún pueden requerir refuerzo para escalar el uso de tecnologías emergentes.
+        
+        - cluster 2 agrupa a colaboradores jóvenes, con edad promedio de 27 años y menos de 3 años en la empresa, principalmente de 
+        la gerencia comercial. Son perfiles recién incorporados, con alta exposición a herramientas digitales y mayor apertura al cambio, 
+        lo que los convierte en candidatos ideales para escalar el uso de tecnologías emergentes como BI e IA mediante formación avanzada y 
+        participación activa en iniciativas de transformación.
+        
+"""
+
 #Visualizacion
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
@@ -306,3 +339,8 @@ plt.xlabel("PC1")
 plt.ylabel("PC2")
 plt.colorbar(label="Cluster")
 plt.show()
+
+"""La proyección de los clusters en el plano PCA muestra una separación clara entre tres segmentos. El grupo morado (Cluster 0) corresponde a perfiles con 
+mayor antigüedad y menor adaptabilidad tecnológica, posiblemente con bajo uso de herramientas BI e IA. En contraste, los grupos amarillo (Cluster 2) y verde (Cluster 1) 
+agrupan a colaboradores jóvenes o adultos con menor antigüedad, que muestran mayor apertura al cambio y mejor integración de herramientas digitales, lo que los posiciona 
+como impulsores naturales de la transformación digital."""
