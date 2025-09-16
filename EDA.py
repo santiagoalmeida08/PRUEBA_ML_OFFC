@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sns
 import plotly as plt
 import os
+from kmodes.kprototypes import KPrototypes
 import unidecode
 
 #Paths
@@ -244,3 +245,64 @@ df_bf_pbi.isnull().sum()
 df_bf_pbi.to_csv(os.path.join(path_bd_final,'info_analisis_encuesta.csv'))
 print(f"La base de datos se exporto correctamente en la ruta {path_bd_final}")
 
+
+#Propuesta de modelo
+
+"""
+Se realizara un modelo de clustering usando K-PROTOTYPES, para ello se tomaran las variables 
+
+        - Edad
+        - Tiempo empresa
+        - Q12 --> Antes de tomar una decisión importante, reviso datos disponibles (tableros, reportes, métricas) para entender mejor la situación.
+        - Q13 --> Cuando aparece una nueva herramienta o actualización digital en la empresa, me adapto con curiosidad y busco aprender cómo usarla.
+        - Gerencia
+        
+"""
+
+df_modelado_var = df_bf_pbi.loc[:, ['edad', 'tiempo_empresa', 'nombregerencia','grupo_t_e','Q12','Q13']].copy()
+df_modelado_var['edad'] = df_modelado_var['edad'].astype(int)
+
+# Categóricas
+cat_cols = ['nombregerencia','grupo_t_e','Q12','Q13']
+for col in cat_cols:
+    df_modelado_var[col] = df_modelado_var[col].astype('category')
+
+# Indices categóricos
+categorical_idx = [df_modelado_var.columns.get_loc(c) for c in cat_cols]
+
+# Matriz: numéricas quedan igual, categóricas en códigos
+X_matrix = df_modelado_var.apply(lambda x: x.cat.codes if x.dtype.name == 'category' else x).to_numpy()
+
+# Modelo
+from kmodes.kprototypes import KPrototypes
+kproto = KPrototypes(n_clusters=3, random_state=42)
+clusters = kproto.fit_predict(X_matrix, categorical=categorical_idx)
+
+df_modelado_var['Cluster'] = clusters
+print(df_modelado_var.head())
+
+
+#interpretacion clusters
+df_int = df_modelado_var.groupby('Cluster').agg({
+    'edad': ['mean', 'min', 'max'],
+    'tiempo_empresa': ['mean'],
+    'nombregerencia': lambda x: x.mode()[0],
+    'grupo_t_e': lambda x: x.mode()[0]
+})
+
+#Visualizacion
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+# Reducir a 2 dimensiones
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_matrix)
+
+# Crear scatterplot
+plt.figure(figsize=(8,6))
+plt.scatter(X_pca[:,0], X_pca[:,1], c=clusters, cmap='viridis', s=50, alpha=0.7)
+plt.title("Clusters proyectados con PCA")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.colorbar(label="Cluster")
+plt.show()
